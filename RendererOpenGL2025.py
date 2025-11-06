@@ -64,7 +64,7 @@ model3 = Model("models/gremlingus.obj")  # Cambia esto por tu tercer archivo .ob
 model3.position.x = 0
 model3.position.y = -2
 model3.position.z = -12
-model3.scale = glm.vec3(0.05, 0.05, 0.05)
+model3.scale = glm.vec3(2.0, 2.0, 2.0)  # Escala grande como solicitaste
 
 # Lista de modelos y control del modelo actual
 models = [model1, model2, model3]
