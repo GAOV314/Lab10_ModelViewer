@@ -57,8 +57,8 @@ model2 = Model("models/Boo_fix.obj")  # Cambia esto por tu segundo archivo .obj
 
 model2.position.x = 0
 model2.position.y = -2
-model2.position.z = -8
-model2.scale = glm.vec3(0.03, 0.03, 0.03)
+model2.position.z = -12
+model2.scale = glm.vec3(0.05, 0.05, 0.05)
 
 # Modelo 3 - Cambia "model3.obj" por el archivo OBJ que quieras usar
 model3 = Model("models/gremlingus.obj")  # Cambia esto por tu tercer archivo .obj
@@ -66,9 +66,9 @@ model3 = Model("models/gremlingus.obj")  # Cambia esto por tu tercer archivo .ob
 # 	model3.AddTexture("textures/texture3.jpg")
 
 model3.position.x = 0
-model3.position.y = 0
+model3.position.y = -2
 model3.position.z = -12
-model3.scale = glm.vec3(5.0, 5.0, 5.0)
+model3.scale = glm.vec3(0.05, 0.05, 0.05)
 
 # Lista de modelos y control del modelo actual
 models = [model1, model2, model3]
@@ -76,6 +76,10 @@ currentModelIndex = 0
 
 # Agregar solo el modelo actual a la escena
 rend.scene.append(models[currentModelIndex])
+
+# Activar modo orbital de cámara
+rend.camera.orbitalMode = True
+rend.camera.SetTarget(glm.vec3(0, -2, -12))
 
 print("\n" + "="*60)
 print("CONTROLES DE SHADERS")
@@ -92,13 +96,23 @@ print("  9 - Wave (NUEVO)")
 print("  0 - Vortex (NUEVO) - Efecto de remolino/torbellino")
 print("\nCambio de Modelos:")
 print("  TAB - Cambiar al siguiente modelo")
+print("\nCámara Orbital:")
+print("  Mouse Click + Arrastrar - Rotar alrededor del modelo")
+print("  Scroll Mouse - Zoom in/out")
+print("  Flechas ← → - Rotar horizontalmente")
+print("  Flechas ↑ ↓ - Rotar verticalmente")
+print("  + / - - Zoom")
 print("\nOtros controles:")
 print("  F - Toggle Wireframe/Filled")
 print("  Z/X - Ajustar value (intensidad de efectos)")
-print("  Flechas - Mover cámara")
 print("  W/A/S/D/Q/E - Mover luz")
 print("="*60 + "\n")
 print(f"Modelo actual: {currentModelIndex + 1}/3\n")
+
+# Variables para control del mouse
+mousePressed = False
+lastMouseX = 0
+lastMouseY = 0
 
 isRunning = True
 
@@ -113,6 +127,31 @@ while isRunning:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			isRunning = False
+		
+		# Controles del mouse para cámara orbital
+		elif event.type == pygame.MOUSEBUTTONDOWN:
+			if event.button == 1:  # Click izquierdo
+				mousePressed = True
+				lastMouseX, lastMouseY = event.pos
+			elif event.button == 4:  # Scroll up
+				rend.camera.Zoom(rend.camera.zoomSensitivity)
+			elif event.button == 5:  # Scroll down
+				rend.camera.Zoom(-rend.camera.zoomSensitivity)
+		
+		elif event.type == pygame.MOUSEBUTTONUP:
+			if event.button == 1:
+				mousePressed = False
+		
+		elif event.type == pygame.MOUSEMOTION:
+			if mousePressed:
+				mouseX, mouseY = event.pos
+				deltaX = mouseX - lastMouseX
+				deltaY = mouseY - lastMouseY
+				
+				rend.camera.RotateHorizontal(deltaX * rend.camera.mouseSensitivity)
+				rend.camera.RotateVertical(-deltaY * rend.camera.mouseSensitivity)
+				
+				lastMouseX, lastMouseY = mouseX, mouseY
 
 		elif event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_f:
@@ -174,20 +213,27 @@ while isRunning:
 				rend.SetShaders(currVertexShader, currFragmentShader)
 				print("Vertex: Vortex (NUEVO) - Efecto de remolino/torbellino")
 	
-	if keys[K_UP]:
-		rend.camera.position.z -= 5 * deltaTime
-
-	if keys[K_DOWN]:
-		rend.camera.position.z += 5 * deltaTime
-
-	if keys[K_RIGHT]:
-		rend.camera.position.x += 5 * deltaTime
-
+	# Controles de cámara orbital con teclado
 	if keys[K_LEFT]:
-		rend.camera.position.x -= 5 * deltaTime
+		rend.camera.RotateHorizontal(-rend.camera.keyboardSensitivity)
+	
+	if keys[K_RIGHT]:
+		rend.camera.RotateHorizontal(rend.camera.keyboardSensitivity)
+	
+	if keys[K_UP]:
+		rend.camera.RotateVertical(rend.camera.keyboardSensitivity)
+	
+	if keys[K_DOWN]:
+		rend.camera.RotateVertical(-rend.camera.keyboardSensitivity)
+	
+	# Zoom con + y -
+	if keys[K_EQUALS] or keys[K_PLUS]:  # + key
+		rend.camera.Zoom(rend.camera.zoomSensitivity * deltaTime * 10)
+	
+	if keys[K_MINUS]:  # - key
+		rend.camera.Zoom(-rend.camera.zoomSensitivity * deltaTime * 10)
 
-
-
+	# Controles de luz
 	if keys[K_w]:
 		rend.pointLight.z -= 10 * deltaTime
 
