@@ -28,12 +28,8 @@ currFragmentShader = fragment_shader
 
 rend.SetShaders(currVertexShader, currFragmentShader)
 
-skyboxTextures = ["skybox/right.jpg",
-				  "skybox/left.jpg",
-				  "skybox/top.jpg",
-				  "skybox/bottom.jpg",
-				  "skybox/front.jpg",
-				  "skybox/back.jpg"]
+# Cargar imagen 360 como skybox
+skyboxTextures = ["skybox/hdri_sky_766.jpg"]
 
 rend.CreateSkybox(skyboxTextures)
 
@@ -68,7 +64,7 @@ model3 = Model("models/gremlingus.obj")  # Cambia esto por tu tercer archivo .ob
 model3.position.x = 0
 model3.position.y = -2
 model3.position.z = -12
-model3.scale = glm.vec3(2.0, 2.0, 2.0)
+model3.scale = glm.vec3(0.05, 0.05, 0.05)
 
 # Lista de modelos y control del modelo actual
 models = [model1, model2, model3]
